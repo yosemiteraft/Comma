@@ -336,6 +336,10 @@ export class CodexSession implements AgentSession {
       if (notice.kind === "disconnected") { this.offline = true; return; }
       if (notice.kind === "reconciled") { this.reconcile(notice.thread); return; }
       const { method, params } = notice;
+      // A lost turn/start acknowledgement has no turn ID. An unrelated CLI may
+      // publish any subsequent turn, so do not "adopt" its events as our write.
+      if (this.state.uncertain && this.state.turnId === null &&
+          (method === "turn/started" || method === "turn/completed")) return;
       for (const event of this.live.feed(method, params)) this.events({ type: "live", event });
       if (method === "turn/started") {
         this.offline = false;
