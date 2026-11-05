@@ -1,5 +1,5 @@
-// Codex driver (the Rust station's runtime/codex.rs): one shared `codex app-server` per profile, under a runner whose id comes
-// from the profile, one thread per session.
+// Codex Driver: connect to an externally managed App Server per profile. Multiple official remote
+// Codex CLI clients and Comma may attach to the same server and thread. No STDIO process ownership.
 //
 // Pinned by spikes (spike/README.md):
 // - a thread adds <1MB to its app-server, so sessions share one process;
@@ -23,7 +23,6 @@ type Json = any;
 /// desktop session, that can take seconds or hang past its 15 s request timeout, and fail with UnknownIssuer.
 /// SSL_CERT_FILE makes it use a CA file instead, for its model websocket as well as its HTTP clients. One the user set
 /// wins.
-const CA_BUNDLE = "/etc/ssl/cert.pem";
 
 export function withCaBundle(env: Record<string, string>, bundle: string) {
   if (["SSL_CERT_FILE", "SSL_CERT_DIR", "CODEX_CA_CERTIFICATE"].some((k) => k in env) || !existsSync(bundle)) return;
@@ -266,11 +265,26 @@ function asOutcome(turn: Json): TurnOutcome {
 
 export class CodexSession implements AgentSession {
   private offline = false;
+  private readonly driver: CodexDriver;
+  private readonly threadId: string;
+  private readonly host: CodexRemoteHost;
+  private readonly profile: Profile;
+  private state: ThreadState;
+  private readonly live: LiveFromCodex;
+  private readonly events: (event: RuntimeEvent) => void;
   constructor(
-    private readonly driver: CodexDriver, private readonly threadId: string, private readonly host: CodexRemoteHost,
-    private readonly profile: Profile, private state: ThreadState, private readonly live: LiveFromCodex,
-    private readonly events: (event: RuntimeEvent) => void,
-  ) {}
+    driver: CodexDriver, threadId: string, host: CodexRemoteHost,
+    profile: Profile, state: ThreadState, live: LiveFromCodex,
+    events: (event: RuntimeEvent) => void,
+  ) {
+    this.driver = driver;
+    this.threadId = threadId;
+    this.host = host;
+    this.profile = profile;
+    this.state = state;
+    this.live = live;
+    this.events = events;
+  }
 
   private endTurn(result: TurnOutcome) {
     this.state.busy = false;

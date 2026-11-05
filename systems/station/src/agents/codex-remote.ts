@@ -14,8 +14,10 @@ export type RemoteSink = (notice: RemoteNotice) => void;
 type Pending = { method: string; resolve: (result: Json) => void; reject: (error: Error) => void };
 
 export class UnknownRemoteResult extends Error {
-  constructor(public readonly method: string) {
+  readonly method: string;
+  constructor(method: string) {
     super("Codex remote connection dropped after sending " + method + "; acceptance unknown; do not retry without reconciliation");
+    this.method = method;
     this.name = "UnknownRemoteResult";
   }
 }
