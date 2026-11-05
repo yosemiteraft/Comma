@@ -5,7 +5,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
-import { WebSocketServer, type WebSocket } from "ws";
+import WebSocket, { WebSocketServer } from "ws";
 import { CodexDriver } from "../src/agents/codex.ts";
 import { CodexRemoteHost, remoteConfig } from "../src/agents/codex-remote.ts";
 import type { OpenOptions, Profile, RuntimeEvent } from "../src/agents/runtime.ts";

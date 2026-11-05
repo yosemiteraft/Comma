@@ -1,6 +1,6 @@
 // Codex App Server client. The server is operator-owned: NEVER spawn or kill it.
 // Both ws:// and Unix sockets use WebSocket-framed JSON-RPC, per Codex's remote protocol.
-import WebSocket from "ws";
+import WebSocket, { type RawData } from "ws";
 import type { Env } from "./machine-logins.ts";
 import type { Profile } from "./runtime.ts";
 
@@ -26,11 +26,10 @@ export function remoteConfig(profile: Profile, env: Env): RemoteConfig {
   // Environment fallback works with older native profile parsers that do not preserve new fields.
   // Profile-level codex_remote is optional where the native config parser permits it.
   const raw = profile.codex_remote ?? profile.codexRemote ?? env.STILLFAIL_CODEX_REMOTE_ENDPOINT;
-  const address = typeof raw === "string" ? raw :
-    raw && typeof raw === "object" && typeof raw.address === "string" ? raw.address : "";
+  const obj = raw !== null && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, unknown> : null;
+  const address = typeof raw === "string" ? raw : typeof obj?.address === "string" ? obj.address : "";
   if (!address) throw new Error("Codex profile " + profile.id + " requires an external Codex server: set STILLFAIL_CODEX_REMOTE_ENDPOINT (STDIO is disabled)");
-  const envName = raw && typeof raw === "object" && typeof raw.authTokenEnv === "string" ?
-    raw.authTokenEnv : env.STILLFAIL_CODEX_REMOTE_AUTH_TOKEN_ENV;
+  const envName = typeof obj?.authTokenEnv === "string" ? obj.authTokenEnv : env.STILLFAIL_CODEX_REMOTE_AUTH_TOKEN_ENV;
   const authorization = envName ? env[envName] : undefined;
   if (envName && !authorization) throw new Error("Codex remote auth-token environment variable is missing");
   if (address.startsWith("unix://")) {
@@ -95,7 +94,7 @@ export class CodexRemoteHost {
     });
   }
 
-  private received(data: WebSocket.RawData) {
+  private received(data: RawData) {
     let msg: Json;
     try { msg = JSON.parse(data.toString()); } catch { return; }
     if (msg?.id !== undefined && msg?.method === undefined) {
