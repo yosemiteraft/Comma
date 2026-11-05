@@ -11,7 +11,7 @@ export type RemoteNotice =
   | { kind: "reconciled"; thread: Json };
 export type RemoteSink = (notice: RemoteNotice) => void;
 
-type Pending = { method: string; resolve: (result: Json) => void; reject: (error: Error) => void };
+type Pending = { method: string; resolve: (result: Json) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> };
 
 export class UnknownRemoteResult extends Error {
   readonly method: string;
@@ -90,9 +90,15 @@ export class CodexRemoteHost {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) return Promise.reject(new Error("Codex remote socket unavailable"));
     const id = this.nextId++;
     return new Promise((resolve, reject) => {
-      this.pending.set(id, { method, resolve, reject });
+      const timer = setTimeout(() => {
+        if (!this.pending.delete(id)) return;
+        reject(new UnknownRemoteResult(method));
+        // Reconnect/reconcile before any further operation on this connection.
+        this.socket?.terminate();
+      }, 30000);
+      this.pending.set(id, { method, resolve, reject, timer });
       try { this.send({ id, method, params }); }
-      catch (e) { this.pending.delete(id); reject(e as Error); }
+      catch (e) { clearTimeout(timer); this.pending.delete(id); reject(e as Error); }
     });
   }
 
@@ -103,6 +109,7 @@ export class CodexRemoteHost {
       const key = Number(msg.id), pending = this.pending.get(key);
       if (!pending) return;
       this.pending.delete(key);
+      clearTimeout(pending.timer);
       if (msg.error != null) pending.reject(new Error("Codex RPC " + pending.method + " refused: " + JSON.stringify(msg.error)));
       else pending.resolve(msg.result ?? null);
     } else if (msg?.id !== undefined && typeof msg.method === "string") {
@@ -117,7 +124,7 @@ export class CodexRemoteHost {
     if (socket !== this.socket) return;
     this.socket = null;
     this.ready = false;
-    for (const p of this.pending.values()) p.reject(new UnknownRemoteResult(p.method));
+    for (const p of this.pending.values()) { clearTimeout(p.timer); p.reject(new UnknownRemoteResult(p.method)); }
     this.pending.clear();
     for (const sink of this.threads.values()) sink({ kind: "disconnected", reason: "Codex remote disconnected" });
     if (!this.closed && this.threads.size) this.scheduleReconnect();
@@ -193,7 +200,7 @@ export class CodexRemoteHost {
     this.closed = true;
     if (this.retryTimer) clearTimeout(this.retryTimer);
     this.retryTimer = null;
-    for (const p of this.pending.values()) p.reject(new UnknownRemoteResult(p.method));
+    for (const p of this.pending.values()) { clearTimeout(p.timer); p.reject(new UnknownRemoteResult(p.method)); }
     this.pending.clear();
     const socket = this.socket;
     this.socket = null;
