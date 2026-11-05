@@ -236,7 +236,23 @@ export class CodexDriver implements AgentDriver {
     if (previous?.host?.remote && previous.host.remote !== h.snapshot().remote)
       throw new Error("Codex remote endpoint changed after Session snapshot; migrate explicitly");
     const session = await this.attach(h, options, events, id);
-    if (previous?.busy) session.restoreKnownTurn(previous.turnId);
+    // Hub attaches the SessionActor only after this async adopt() returns.
+    // If a turn completed while Station was down, deliver the authoritative
+    // completion on the following event-loop tick, after actor.adopt().
+    if (previous?.busy || snapshot === null) {
+      const thread = await h.readThread(id);
+      const turns: Json[] = Array.isArray(thread.turns) ? thread.turns : [];
+      const matching = previous?.turnId ? turns.find((t) => t.id === previous.turnId) : turns.at(-1);
+      if (matching && ["completed", "interrupted", "failed"].includes(matching.status)) {
+        const verifiedOutcome = asOutcome(matching);
+        setImmediate(() => events({ type: "turnEnded", outcome: verifiedOutcome }));
+      } else if (matching?.status === "inProgress") {
+        session.restoreKnownTurn(matching.id);
+      } else {
+        session.blockUnknownTurn();
+        log.warn("agents::codex", "adopt could not verify the previously running turn; blocked against duplicate execution", { thread: id });
+      }
+    }
     return session;
   }
 
@@ -312,6 +328,7 @@ export class CodexSession implements AgentSession {
     // Unknown accept without a server-confirmed turn stays blocked.
   }
   restoreKnownTurn(id: string | null) { if (this.state.busy && id) this.state.turnId = id; }
+  blockUnknownTurn() { this.state.busy = true; this.state.uncertain = true; }
 
   sink(): RemoteSink {
     return (notice) => {
