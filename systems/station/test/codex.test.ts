@@ -144,7 +144,7 @@ test("Comma connects to already-running server and retains MCP/config and same t
     await until(() => events.some((e) => e.type === "turnEnded"));
     assert.equal(fake.threads.get(s.id())?.turns.length, 1);
     await d.shutdown();
-    assert.equal(fake.server.listening, true, "Station shutdown must not kill external server");
+    assert.notEqual(fake.server.address(), null, "Station shutdown must not kill external server");
   } finally { await fake.close(); }
 });
 
@@ -203,7 +203,7 @@ test("Station snapshot/adopt reuses remote thread and leaves server running", as
     const s = await d1.open(options(p), () => {});
     const snapshot = s.snapshot();
     d1.detach();
-    assert.equal(fake.server.listening, true);
+    assert.notEqual(fake.server.address(), null);
     const d2 = makeDriver(fake.endpoint);
     const resumed = await d2.adopt(options(p), snapshot, () => {});
     assert.equal(resumed.id(), s.id());

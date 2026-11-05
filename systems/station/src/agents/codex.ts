@@ -281,6 +281,9 @@ export class CodexSession implements AgentSession {
   private reconcile(thread: Json) {
     this.offline = false;
     const turns: Json[] = Array.isArray(thread?.turns) ? thread.turns : [];
+    // When the acknowledgement of our turn/start was lost, another CLI may have
+    // written the last turn. No response ID means we cannot attribute that turn.
+    if (this.state.uncertain && this.state.turnId === null) return;
     const last = (this.state.turnId && turns.find((t) => t.id === this.state.turnId)) || turns.at(-1);
     if (this.state.busy && last && ["completed", "interrupted", "failed"].includes(last.status) &&
         (this.state.turnId === null || last.id === this.state.turnId)) {
@@ -311,6 +314,7 @@ export class CodexSession implements AgentSession {
         this.state.busy = true;
         if (!wasBusy) this.events({ type: "turnStarted" });
       } else if (method === "turn/completed") {
+        if (this.state.uncertain && this.state.turnId === null) return;
         if (this.state.turnId !== null && params?.turn?.id !== this.state.turnId) return;
         this.endTurn(asOutcome(params?.turn));
       } else if (method === "error" && params?.willRetry !== true) {

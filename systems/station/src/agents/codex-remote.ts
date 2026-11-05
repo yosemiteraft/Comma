@@ -169,7 +169,12 @@ export class CodexRemoteHost {
     if (this.connection) return this.connection;
     this.connection = this.connect();
     try { await this.connection; }
-    finally { this.connection = null; }
+    catch (error) {
+      // A disconnect DURING initialize/rejoin happened while connection was still set.
+      // Schedule after finally releases that lock; without this the host never retries.
+      if (!this.closed && this.threads.size) setImmediate(() => this.scheduleReconnect());
+      throw error;
+    } finally { this.connection = null; }
   }
 
   async request(method: string, params: Json): Promise<Json> {
