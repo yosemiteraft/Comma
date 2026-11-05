@@ -1,0 +1,27 @@
+# API pseudocode with sequence/snapshots
+
+**Verified** means API name is in inspected source, NOT that target runtime behavior is tested.
+
+| Step | File | Function | Call | Input | Output & snapshot | Evidence |
+|---|---|---|---|---|---|---|
+| T10 | external Codex | CLI `app-server` | `--listen <unix/ws>` | endpoint | server externally running | upstream Codex CLI |
+| T20 | Comma `src/agents/codex.ts` | existing `CodexDriver.open` | `thread/start` or `thread/resume` | `OpenOptions` | S1: CommaSession → real threadId | inspected Comma source |
+| T30 | planned transport | **PROPOSED** `RemoteHost.connect` | `initialize`, `initialized` | endpoint/auth | connected RPC client | not implemented |
+| T40 | Comma `CodexSession.prompt` | existing function | `turn/start` | threadId/input | turn ID or unknown | inspected Comma source |
+| T50 | Comma `CodexSession.steer` | existing function | `turn/steer` | expectedTurnId | accepted/refused | inspected Comma source |
+| T60 | Station `tools/mcp.ts` | existing `McpEndpoint.handle` | HTTP `tools/list`, `tools/call` | Session bearer | scoped tool result | inspected Comma source |
+| T70 | external CLI | `codex --remote` (verified flag) | resume same Thread | endpoint + threadId | shared history; write G0 unverified | upstream CLI main.rs |
+| T80 | Codex server | `thread/read` | reconcile | threadId | S3: authoritative turn state | pinned protocol verification needed |
+
+```text
+operator starts external Codex Server
+Comma: connectEndpoint(profile) [PROPOSED, not existing]
+  rpc(initialize); rpc(thread/start or thread/resume)
+  save exact thread.id
+CodexSession.prompt(text): rpc(turn/start, threadId, input)
+  if connection lost before ack: set UNCERTAIN; reconcile server; no blind replay
+CLI A and B: codex --remote <same endpoint> resume <same thread.id>
+  append next turn after server accepts it
+```
+
+**Snapshots:** S0 before connect: endpoint configured, no Comma process ownership. S1 after start: immutable threadId shared. S2 after each turn: accepted turnId/status. S3 after reconnect: server and local statuses reconciled. Real test pending.
