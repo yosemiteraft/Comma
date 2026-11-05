@@ -34,3 +34,11 @@ sequenceDiagram
 **S4 crash snapshot:** Comma loses connection after `turn/start` sent; server may have accepted. Comma marks unknown, reads server truth, reconnects without resending blindly. External server and CLI continue running.
 
 Existing evidence: `CodexDriver.open`, `CodexSession.prompt` in `systems/station/src/agents/codex.ts`; official CLI `--remote` in `openai/codex/codex-rs/cli/src/main.rs`. No model calls needed for Station dispatch; model runs only on Codex Turn.
+
+
+## Implemented Comma-side sequence (program unless model turn executes)
+P1 CodexDriver.host -> remoteConfig -> CodexRemoteHost.ensureReady -> connect to operator-owned WS/Unix app-server -> initialize/initialized.
+P2 CodexDriver.attach -> thread/start|thread/resume -> save returned thread ID and register sink. Snapshot: {CommaSession, endpoint, threadId}.
+P3 CodexSession.prompt -> thread/read -> turn/start. Snapshot: {threadId, acceptedTurnId, busy}; Codex model M runs only after server accepts Turn.
+P4 CodexRemoteHost.received -> CodexSession.sink on turn/started, item/*, turn/completed; on loss snapshot {turnId:null, uncertain:true}, no blind retry.
+P5 CodexRemoteHost reconnect -> thread/resume -> thread/read; verify known Turn and emit completion only after SessionActor adopt. Native CLI A/B same-thread writes remain unverified.

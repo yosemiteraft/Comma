@@ -9,3 +9,9 @@
 **D-004 Pending G0 proof:** share one thread across multiple writable official CLIs. Multiwriter conflicts require server-level turn serialization. If actual CLI/server cannot do this, stop and compare gateway vs upstream change.
 
 **D-005 Chosen:** do not modify GitHub Actions, unrelated docs outside `.dsu`, deploy, or merge as part of this draft. Update `.dsu/index.md` and Ticket `state.md` together per `structure.md`.
+
+
+## Implementation-stage decisions
+D-006: Keep existing Comma Station HTTP MCP tooling independent of app-server RPC. Use external CodexRemoteHost over Unix or WS/WSS, rather than app-server process ownership or dynamicTools callbacks.
+D-007: On an unknown turn/start acceptance, block further writes until authoritative reconciliation; never treat another CLI's newest turn as Comma's accepted write.
+D-008: No Actions invocation or modification. Code is on a development branch; do not merge or release until real G0–G5 test evidence exists.

@@ -1,6 +1,6 @@
 # Unified .dsu development index
 
-**Start here:** [Ticket t-share-codex](tickets/t-share-codex/t-share-codex.md) → [current state/handoff](tickets/t-share-codex/state.md). **Status:** specs created, code and G0 real tests pending. Root [structure.md](../structure.md) governs this directory; root [AGENTS.md](../AGENTS.md) retains baseline rules. This is the *only* index in .dsu.
+**Start here:** [Ticket t-share-codex](tickets/t-share-codex/t-share-codex.md) → [current state/handoff](tickets/t-share-codex/state.md). **Status:** Codex remote code and mock tests committed; G0 real native CLI test and TypeScript/local tests still pending. Root [structure.md](../structure.md) governs this directory; root [AGENTS.md](../AGENTS.md) retains baseline rules. This is the *only* index in .dsu.
 
 | What you need | File |
 |---|---|
@@ -22,3 +22,10 @@
 [Systems instructions](../systems/AGENTS.md) — runtime constraints. [Concept inventory](../docs/architecture/DOMAIN_CONCEPTS.md) — domain owners; avoid new identity without evidence. [Project docs navigation](../docs/README.md). [Codex Driver](../systems/station/src/agents/codex.ts) — owned STDIO Host; [Agent runtime](../systems/station/src/agents/runtime.ts) — common interfaces; [profiles.ts](../systems/station/src/agents/profiles.ts) — credentials and configuration; [sessions/agents.ts](../systems/station/src/sessions/agents.ts) — creation/MCP; [Station MCP](../systems/station/src/tools/mcp.ts) — tool authorization; [Driver test](../systems/station/test/codex.test.ts) and [fake](../systems/station/test/fake/codex.mjs); [Runner docs](../systems/station/docs/station-ts-native.md). [Upstream Codex native CLI --remote](https://github.com/openai/codex/blob/main/codex-rs/cli/src/main.rs).
 
 No Worker Session ID is known, so no `.dsu/workers/` file was invented. **update-doc performed**: this index and ticket state are consistent with all listed docs.
+
+
+## Source changes in t-share-codex — implementation update
+New systems/station/src/agents/codex-remote.ts — remote JSON-RPC WS/Unix transport, authentication, reconnect and unknown RPC handling.
+Modified systems/station/src/agents/codex.ts — Codex Driver/Session now connect to pre-running remote App Server; per-Session Station MCP preserved, no owned STDIO process.
+Replaced systems/station/test/codex.test.ts — simulated shared-thread and failure tests, NOT EXECUTED here. Legacy systems/station/test/fake/codex.mjs is not used by these tests.
+Ticket handoff in tickets/t-share-codex/state.md is authoritative: still OPEN, P0 real native CLI multiwriter proof and G0–G5 missing; no Actions or release.

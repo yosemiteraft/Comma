@@ -11,4 +11,8 @@ Root `structure.md`: user's original normative development document. Existing `A
 `.dsu/tickets/t-share-codex/{t-share-codex,state}.md`: objective and primary handoff.
 `.dsu/workers/`: no Worker ID known; no fabricated worker file.
 
-Existing source candidates (not changed yet): `systems/station/src/agents/codex.ts`, `profiles.ts`, `runtime.ts`, `sessions/agents.ts`, `tools/mcp.ts`, `test/codex.test.ts`, `test/fake/codex.mjs`. Existing Runner docs: `systems/station/docs/station-ts-native.md`.
+Existing source paths, with Codex Driver and test now changed: `systems/station/src/agents/codex.ts`, `profiles.ts`, `runtime.ts`, `sessions/agents.ts`, `tools/mcp.ts`, `test/codex.test.ts`, `test/fake/codex.mjs`. Existing Runner docs: `systems/station/docs/station-ts-native.md`.
+
+
+## Verified changed source paths
+systems/station/src/agents/codex-remote.ts (new), systems/station/src/agents/codex.ts (modified), systems/station/test/codex.test.ts (replaced). Existing systems/station/test/fake/codex.mjs is legacy, no longer used by the new Codex test.

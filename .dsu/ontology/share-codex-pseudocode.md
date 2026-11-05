@@ -25,3 +25,14 @@ CLI A and B: codex --remote <same endpoint> resume <same thread.id>
 ```
 
 **Snapshots:** S0 before connect: endpoint configured, no Comma process ownership. S1 after start: immutable threadId shared. S2 after each turn: accepted turnId/status. S3 after reconnect: server and local statuses reconciled. Real test pending.
+
+
+## As-built functions and authoritative APIs
+T100: codex-remote.ts remoteConfig(profile, env) -> validates Unix/WS/WSS endpoint, optional bearer env; output RemoteConfig.
+T110: codex-remote.ts CodexRemoteHost.connect() -> WebSocket handshake -> initialize, initialized; output connection and RPC mapping.
+T120: codex.ts CodexDriver.attach() -> thread/start or thread/resume with developerInstructions, config.mcp_servers.stillfail.*; output thread.id.
+T130: codex.ts CodexSession.prompt() -> thread/read, turn/start(threadId,input); output turn.id or UnknownRemoteResult; concurrent control ultimately server-owned.
+T140: codex-remote.ts received() -> thread notification sink; codex.ts CodexSession.sink() -> RuntimeEvent.
+T150: codex-remote.ts connect() after loss -> thread/resume + thread/read(includeTurns:true) -> reconcile; no unverified attribution.
+T160: codex.ts CodexDriver.adopt() -> server thread/read, deferred setImmediate(turnEnded) for verified completed turn; SessionActor state attached first.
+T170: codex.ts shutdown/detach -> CodexRemoteHost.detach -> close Comma socket only; server still alive. G0 native CLI results are not available.

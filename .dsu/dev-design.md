@@ -1,6 +1,6 @@
 # Design — externally managed shared Codex App Server
 
-**Status:** proposal, not implemented. See [functional spec](dev-spec.md).
+**Status:** implemented as source in development branch; compatibility and safety gates unverified. See [functional spec](dev-spec.md).
 
 ```text
 Official CLI A --remote ─┐
@@ -31,3 +31,8 @@ Current Runner replay cannot simply be reused for network transport. On uncertai
 ### Planned code touch points (NOT CHANGED)
 
 `systems/station/src/agents/codex.ts`; new Codex-specific transport source; `src/agents/profiles.ts`; `src/sessions/agents.ts`; `test/codex.test.ts`; `test/fake/codex.mjs`. Keep `src/agents/runtime.ts` and `src/tools/mcp.ts` contract unchanged if possible. See [module implementation plan](modules/m-codex-shared-transport/impl.md).
+
+
+## Implemented code path
+Program: CodexDriver.host calls remoteConfig and CodexRemoteHost.ensureReady; transport opens WebSocket to already-running server; initialize/initialized handshake; CodexDriver.attach calls thread/start or thread/resume with developerInstructions, model, cwd, MCP URL/token; CodexSession.prompt performs thread/read then turn/start; server emits turn/started, item events and turn/completed to CodexSession.sink; reconnect calls thread/resume and thread/read; shutdown/detach closes only the Comma client, not the shared Codex server.
+All clients must connect to the same server and thread ID. Client-side busy precheck is not a global lock. A lost turn/start acknowledgement without authoritative turn ID blocks the Session instead of attributing another CLI's turn. No normal STDIO fallback. Account/profile affinity and real native CLI write behavior remain P0/P1 gates.

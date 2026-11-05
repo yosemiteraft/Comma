@@ -16,3 +16,11 @@
 - Capture exact commands and observed results in `tickets/t-share-codex/state.md`.
 
 **No production deployment or merge** until all G0–G5 acceptance gates have passing evidence and any GitHub Actions effects are separately authorized.
+
+
+## Current implementation configuration (not run here)
+Operator starts Codex separately, for example: codex app-server --listen unix:///absolute/path/to/codex.sock
+Comma Station environment: STILLFAIL_CODEX_REMOTE_ENDPOINT=unix:///absolute/path/to/codex.sock
+Each native CLI uses same endpoint and exact Comma-created thread: codex --remote unix:///absolute/path/to/codex.sock resume THREAD_ID (verify installed version's help).
+Alternative loopback server: codex app-server --listen ws://127.0.0.1:4600 ; set STILLFAIL_CODEX_REMOTE_ENDPOINT=ws://127.0.0.1:4600. Optional auth for WS/WSS: STILLFAIL_CODEX_REMOTE_AUTH_TOKEN_ENV names another environment variable containing bearer token. Do not commit token values.
+Testing pending: pnpm --dir systems/station check; package.json Station local test suite; official Codex app-server with CLI A, CLI B and Comma sharing one thread; MCP authorized/unauthorized tests; simultaneous writers; reconnect mid-turn. No commands requiring GitHub Actions.

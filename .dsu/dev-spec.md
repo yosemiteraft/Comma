@@ -1,6 +1,6 @@
 # Development specification — t-share-codex
 
-**Status:** specification ready; implementation and real multi-client tests NOT DONE. **Baseline:** `yosemiteraft/Comma` main @ `66ab3dc92475005aea9afd123df36a28e4ef86ab`. **Date:** 2026-11-04.
+**Status:** CODE COMMITTED; NOT ACCEPTED. TypeScript/local test execution and real Codex CLI sharing tests pending. **Baseline:** `yosemiteraft/Comma` main @ `66ab3dc92475005aea9afd123df36a28e4ef86ab`. **Date:** 2026-11-04.
 
 ## Goal
 
@@ -43,3 +43,8 @@ F8. No change to Comma Router, Task/Worker semantics, Claude Runner, GitHub Acti
 ## Source / documents
 
 [Architecture](dev-design.md) · [Decision ledger](decisions.md) · [Risk review](topics/shared-codex-risk-review.md) · [Ticket state](tickets/t-share-codex/state.md) · [Cross-module contract](modules/contracts/codex-shared-session.md). Existing source: `systems/station/src/agents/codex.ts`, `runtime.ts`, `profiles.ts`, `sessions/agents.ts`, `tools/mcp.ts`. 
+
+
+## Implementation update (2026-11-04)
+Source changes on ticket/t-share-codex: systems/station/src/agents/codex-remote.ts (external WS/Unix JSON-RPC connection, endpoint validation, optional bearer via environment, thread rejoin, request timeouts and fail-closed unknown results); systems/station/src/agents/codex.ts (external Host instead of Codex STDIO Runner, retained developerInstructions and per-Session Station MCP config, turn/recovery lifecycle); systems/station/test/codex.test.ts (mock external WebSocket sharing, collision, recovery and unknown-result tests).
+This is NOT proof of real CLI interoperability. G0–G5 are outstanding; native two-CLI write, Station MCP permissions, real racing/recovery, account-affinity/security, local TypeScript check and test suite have NOT been executed. Do not deploy or merge.

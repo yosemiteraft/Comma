@@ -15,3 +15,12 @@
 **Engineering budget, uncertain:** G0 1–2 days; transport 3–6; multiwriter/recovery 4–9; MCP/security 2–4; regressions 3–5. Approx. 13–26 engineer-days with overlap and upstream variability; not a claim of actual elapsed time.
 
 **No-go:** if two *official* CLI clients cannot both write the exact same server-owned Thread reliably, do not ship partial transport code as the requested feature.
+
+
+## After coding — gates still NOT passed
+G0: official native Codex CLI A/B same-thread writes: NOT TESTED (no real server or installed Codex in this environment).
+G1: live MCP authorization and tool access: NOT TESTED (config retained in code).
+G2: three-client concurrent turn conflict: MOCK TEST AUTHORED, NOT RUN; server arbitration must be proven.
+G3: Station disconnect, unknown request and mid-turn reconnect: MOCK TEST AUTHORED, NOT RUN; real proof missing.
+G4: TypeScript compile/test: NOT RUN (dependencies/repo checkout unavailable here).
+G5: auth/account isolation, cross-machine paths, secrets, permissions: NOT TESTED. Fail closed; no merge.
