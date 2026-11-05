@@ -29,3 +29,6 @@ New systems/station/src/agents/codex-remote.ts — remote JSON-RPC WS/Unix trans
 Modified systems/station/src/agents/codex.ts — Codex Driver/Session now connect to pre-running remote App Server; per-Session Station MCP preserved, no owned STDIO process.
 Replaced systems/station/test/codex.test.ts — simulated shared-thread and failure tests, NOT EXECUTED here. Legacy systems/station/test/fake/codex.mjs is not used by these tests.
 Ticket handoff in tickets/t-share-codex/state.md is authoritative: still OPEN, P0 real native CLI multiwriter proof and G0–G5 missing; no Actions or release.
+
+## Current review location
+Draft PR #1: https://github.com/yosemiteraft/Comma/pull/1 . Not ready to merge; consult tickets/t-share-codex/state.md for test and security blockers.

@@ -1,6 +1,6 @@
 # t-share-codex — state and handoff
 
-**Date:** 2026-11-04. **Branch:** `ticket/t-share-codex` on `yosemiteraft/Comma`, based on `66ab3dc92475005aea9afd123df36a28e4ef86ab`. **Status: CODE COMMITTED, NOT ACCEPTED. P0 G0 native CLI multiwriter still unverified. Draft PR planned; do not merge.**
+**Date:** 2026-11-04. **Branch:** `ticket/t-share-codex` on `yosemiteraft/Comma`, based on `66ab3dc92475005aea9afd123df36a28e4ef86ab`. **Status: CODE COMMITTED, NOT ACCEPTED. P0 G0 native CLI multiwriter still unverified. Draft PR #1 opened: https://github.com/yosemiteraft/Comma/pull/1; do not merge.**
 
 ## Done
 - Copied user's `structure(1).md` into root `structure.md`.
@@ -27,3 +27,7 @@ Do not invent an unavailable real Worker Session ID; create `.dsu/workers/w-*/w-
 DONE: committed Codex external WebSocket/Unix transport (systems/station/src/agents/codex-remote.ts), refactored Driver (systems/station/src/agents/codex.ts), and remote fake tests (systems/station/test/codex.test.ts). Built-in Station MCP developerInstructions and per-session URL/token preserved. Unknown results fail closed. All .dsu spec, design, implementation, ontology, risk, index updated together.
 NOT DONE: no project checkout/dependencies in this container; no TypeScript compiler run against project or tests run, no installed Codex CLI or externally running app-server for real same-thread multi-CLI read/write; no native G0/G1/G2/G3/G5 proof. Keep Ticket OPEN; don't merge or deploy.
 NEXT: run pnpm --dir systems/station check and local tests, fix failures; run official Codex CLI A/B and Comma against one server/thread, verify two writes, server concurrency, MCP allow/deny and restart recovery; record outputs and close only after G0–G5. No GitHub Actions without explicit renewed authorization.
+
+## Pull request
+Draft PR #1: https://github.com/yosemiteraft/Comma/pull/1
+Open for code review and real acceptance work; merge is blocked by G0–G5 and no local test evidence. No GitHub Actions were invoked or changed. Branch: ticket/t-share-codex.
